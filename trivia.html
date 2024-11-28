@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trivia Challenge Game</title>
+    <style>
+      /* Base Styles */
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f9;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        box-sizing: border-box;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 600px; /* Max width for large screens */
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        font-size: 32px;
+        color: #333;
+      }
+
+      .question {
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: #333;
+      }
+
+      .answers {
+        list-style-type: none;
+        padding: 0;
+      }
+
+      .answers li {
+        margin: 10px 0;
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        padding: 10px;
+        cursor: pointer;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+      }
+
+      .answers li:hover {
+        background-color: #e0e0e0;
+      }
+
+      #next-button {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #4caf50;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+      }
+
+      #next-button:hover {
+        background-color: #45a049;
+      }
+
+      #result {
+        margin-top: 20px;
+        font-size: 20px;
+        font-weight: bold;
+      }
+
+      /* Responsive Styles */
+      @media (max-width: 768px) {
+        h1 {
+          font-size: 28px;
+        }
+
+        .question {
+          font-size: 20px;
+        }
+
+        .answers li {
+          font-size: 16px;
+          padding: 12px;
+        }
+
+        #next-button {
+          width: 100%;
+          font-size: 18px;
+          padding: 15px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .container {
+          padding: 15px;
+        }
+
+        h1 {
+          font-size: 24px;
+        }
+
+        .question {
+          font-size: 18px;
+        }
+
+        .answers li {
+          font-size: 14px;
+          padding: 10px;
+        }
+
+        #next-button {
+          font-size: 16px;
+          padding: 12px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Trivia Challenge</h1>
+      <div id="question-container">
+        <p class="question" id="question"></p>
+        <ul class="answers" id="answers"></ul>
+      </div>
+      <button id="next-button" onclick="nextQuestion()" style="display: none">
+        Next Question
+      </button>
+      <div id="result" style="display: none"></div>
+    </div>
+
+    <script>
+      const questions = [
+        {
+          question: "What is the capital of France?",
+          options: ["Berlin", "Madrid", "Paris", "Rome"],
+          correct: 2,
+        },
+        {
+          question: "What is the largest planet in our solar system?",
+          options: ["Earth", "Jupiter", "Saturn", "Mars"],
+          correct: 1,
+        },
+        {
+          question: "Which language is primarily used for web development?",
+          options: ["Python", "JavaScript", "C++", "Java"],
+          correct: 1,
+        },
+        {
+          question: "Who painted the Mona Lisa?",
+          options: [
+            "Vincent van Gogh",
+            "Pablo Picasso",
+            "Leonardo da Vinci",
+            "Claude Monet",
+          ],
+          correct: 2,
+        },
+      ];
+
+      let currentQuestionIndex = 0;
+      let score = 0;
+
+      // Display the current question and options
+      function loadQuestion() {
+        const questionObj = questions[currentQuestionIndex];
+        document.getElementById("question").textContent = questionObj.question;
+        const answersList = document.getElementById("answers");
+        answersList.innerHTML = ""; // Clear previous answers
+
+        questionObj.options.forEach((answer, index) => {
+          const li = document.createElement("li");
+          li.textContent = answer;
+          li.onclick = () => checkAnswer(index);
+          answersList.appendChild(li);
+        });
+      }
+
+      // Check the answer and update score
+      function checkAnswer(selectedIndex) {
+        const correctIndex = questions[currentQuestionIndex].correct;
+        if (selectedIndex === correctIndex) {
+          score++;
+        }
+        // Disable the options after answering
+        const answers = document.querySelectorAll(".answers li");
+        answers.forEach((li, index) => {
+          li.onclick = null; // Disable click
+          if (index === correctIndex) {
+            li.style.backgroundColor = "#d4edda"; // Correct answer
+          } else if (index === selectedIndex) {
+            li.style.backgroundColor = "#f8d7da"; // Incorrect answer
+          }
+        });
+        // Show the Next button
+        document.getElementById("next-button").style.display = "inline";
+      }
+
+      // Go to the next question
+      function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+          loadQuestion();
+          document.getElementById("next-button").style.display = "none";
+        } else {
+          showResult();
+        }
+      }
+
+      // Show the final result
+      function showResult() {
+        const resultElement = document.getElementById("result");
+        resultElement.style.display = "block";
+        resultElement.textContent = `Your Score: ${score} / ${questions.length}`;
+        document.getElementById("question-container").style.display = "none";
+        document.getElementById("next-button").style.display = "none";
+      }
+
+      // Initialize the game
+      loadQuestion();
+    </script>
+  </body>
+</html>
