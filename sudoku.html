@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sudoku Game</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f8f9fa;
+            padding: 20px;
+        }
+        #sudoku {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            max-width: 400px;
+            width: 100%;
+        }
+        .cell {
+            width: 100%;
+            height: 50px;
+            text-align: center;
+            font-size: 24px;
+            border: 1px solid #000;
+            line-height: 50px;
+        }
+        .cell input {
+            width: 100%;
+            height: 100%;
+            border: none;
+            text-align: center;
+            font-size: 24px;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+
+<div>
+    <h1 class="text-center mb-4"> Sudoku Game</h1>
+    <div id="sudoku"></div>
+    <button class="btn btn-primary mt-3" onclick="checkSudoku()">Check Solution</button>
+    <button class="btn btn-success mt-3" onclick="solvePuzzle()">Solve Puzzle</button>
+    <button class="btn btn-warning mt-3" onclick="restartPuzzle()">Restart</button>
+    <p id="message" class="text-center mt-3"></p>
+</div>
+
+<script>
+    const puzzles = [
+        [
+            [5, 3, '', '', 7, '', ''],
+            [6, '', '', 1, 9, 5, ''],
+            ['', 9, 8, '', '', '', ''],
+            [8, '', '', '', 6, '', ''],
+            [4, '', '', 8, '', 3, ''],
+            [7, '', '', '', 2, '', ''],
+            ['', 6, '', '', '', 2, ''],
+            ['', '', '', 4, '', '', 5]
+        ],
+        [
+            [1, '', '', 3, '', '', 7],
+            ['', 6, '', '', 1, '', ''],
+            [3, '', '', 6, '', 4, ''],
+            ['', 1, '', '', 5, '', ''],
+            ['', '', 4, '', '', '', 1],
+            ['', '', 1, 2, '', '', ''],
+            [5, '', '', '', 6, 3, '']
+        ],
+        [
+            ['', '', 3, '', '', 5, 1],
+            [2, '', '', '', 4, '', ''],
+            ['', '', '', 3, '', 2, ''],
+            ['', 2, '', 1, '', '', 3],
+            ['', 3, 1, '', '', '', ''],
+            [4, '', '', '', '', 1, 2],
+            [1, '', '', '', '', '', '']
+        ],
+        [
+            [2, 3, '', '', '', '', 1],
+            ['', '', 4, 5, '', 6, ''],
+            [5, '', '', 2, '', 4, 3],
+            ['', '', '', '', 7, '', ''],
+            ['', 1, 3, '', '', 5, ''],
+            [1, 4, '', 3, 6, '', 2],
+            [3, '', '', '', '', '', 4]
+        ],
+        [
+            ['', 7, 5, '', '', '', ''],
+            [6, '', '', 1, '', '', 3],
+            ['', 8, 9, '', 4, '', 5],
+            [2, '', '', '', '', 1, ''],
+            ['', '', '', 2, '', '', 6],
+            ['', 4, 1, 5, '', '', ''],
+            [7, '', '', '', '', '', 8]
+        ],
+        [
+            [9, 4, '', '', '', 5, ''],
+            ['', '', '', 4, '', '', 3],
+            ['', 5, '', '', 2, 6, 9],
+            ['', '', 2, '', 1, '', 4],
+            ['', '', 3, 2, '', '', 5],
+            ['', 9, '', 3, '', '', ''],
+            ['', '', 4, '', 6, '', 7]
+        ]
+    ];
+
+    const solutions = [
+        [
+            [5, 3, 4, 6, 7, 8, 9],
+            [6, 2, 7, 1, 9, 5, 3],
+            [1, 9, 8, 2, 4, 3, 6],
+            [8, 5, 9, 3, 6, 1, 2],
+            [4, 1, 6, 8, 5, 3, 7],
+            [7, 8, 2, 9, 2, 4, 1],
+            [3, 6, 1, 7, 8, 2, 4]
+        ],
+        [
+            [1, 2, 5, 3, 4, 8, 7],
+            [4, 6, 3, 7, 1, 9, 2],
+            [3, 7, 8, 6, 5, 4, 1],
+            [7, 1, 6, 8, 5, 2, 4],
+            [2, 5, 4, 9, 3, 7, 1],
+            [8, 3, 1, 2, 6, 4, 9],
+            [5, 9, 7, 1, 8, 6, 3]
+        ],
+        [
+            [4, 6, 3, 2, 7, 5, 1],
+            [2, 1, 7, 6, 4, 9, 8],
+            [1, 3, 8, 3, 5, 2, 4],
+            [5, 2, 6, 1, 3, 8, 7],
+            [3, 4, 1, 7, 8, 6, 9],
+            [6, 8, 9, 4, 1, 3, 2],
+            [7, 9, 5, 8, 2, 1, 3]
+        ],
+        [
+            [2, 3, 6, 4, 5, 8, 1],
+            [4, 9, 7, 5, 1, 6, 3],
+            [5, 1, 8, 2, 3, 4, 9],
+            [9, 2, 5, 1, 7, 3, 8],
+            [8, 1, 3, 9, 6, 5, 4],
+            [1, 4, 2, 3, 8, 9, 7],
+            [3, 6, 9, 8, 2, 7, 5]
+        ],
+        [
+            [1, 7, 5, 6, 3, 2, 4],
+            [6, 2, 8, 1, 5, 4, 3],
+            [4, 8, 9, 7, 4, 1, 5],
+            [2, 6, 3, 4, 8, 1, 7],
+            [3, 1, 2, 5, 9, 7, 6],
+            [5, 4, 1, 3, 2, 9, 8],
+            [7, 9, 4, 2, 1, 6, 8]
+        ],
+        [
+            [9, 4, 7, 6, 8, 5, 2],
+            [1, 2, 6, 4, 5, 3, 9],
+            [3, 5, 8, 7, 2, 6, 4],
+            [6, 7, 2, 9, 1, 8, 5],
+            [8, 3, 9, 2, 4, 1, 6],
+            [4, 1, 5, 3, 6, 2, 7],
+            [2, 6, 4, 5, 7, 9, 3]
+        ]
+    ];
+
+    let sudoku;
+    let currentPuzzleIndex = 0;
+
+    function getRandomPuzzleIndex() {
+        return Math.floor(Math.random() * puzzles.length);
+    }
+
+    function renderSudoku() {
+        const sudokuContainer = document.getElementById('sudoku');
+        sudokuContainer.innerHTML = '';
+        for (let row = 0; row < 7; row++) {
+            for (let col = 0; col < 7; col++) {
+                const value = sudoku[row][col];
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.innerHTML = value === '' ? `<input type="number" min="1" max="7" oninput="this.value = this.value.slice(0, 1)">` : value;
+                sudokuContainer.appendChild(cell);
+            }
+        }
+    }
+
+    function checkSudoku() {
+        const inputs = document.querySelectorAll('#sudoku input');
+        let valid = true;
+        inputs.forEach((input, index) => {
+            const row = Math.floor(index / 7);
+            const col = index % 7;
+            const value = parseInt(input.value);
+            if (value !== solutions[currentPuzzleIndex][row][col]) {
+                valid = false;
+            }
+        });
+        document.getElementById('message').innerText = valid ? 'Correct Solution!' : 'Incorrect Solution. Try again!';
+    }
+
+    function solvePuzzle() {
+        for (let row = 0; row < 7; row++) {
+            for (let col = 0; col < 7; col++) {
+                if (sudoku[row][col] === '') {
+                    sudoku[row][col] = solutions[currentPuzzleIndex][row][col];
+                }
+            }
+        }
+        renderSudoku();
+        document.getElementById('message').innerText = 'Puzzle Solved!';
+    }
+
+    function restartPuzzle() {
+        currentPuzzleIndex = getRandomPuzzleIndex(); // Get a random puzzle index
+        sudoku = JSON.parse(JSON.stringify(puzzles[currentPuzzleIndex])); // Deep copy of the selected puzzle
+        renderSudoku();
+        document.getElementById('message').innerText = '';
+    }
+
+    // Initialize the game with a random puzzle
+    restartPuzzle(); // Initialize the game
+</script>
+
+</body>
+</html>
